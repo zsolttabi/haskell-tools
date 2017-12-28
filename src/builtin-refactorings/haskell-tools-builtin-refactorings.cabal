@@ -34,6 +34,7 @@ extra-source-files: examples/CPP/*.hs
                   , examples/Refactor/RenameDefinition/SpliceType/*.hs
                   , examples/Refactor/RenameDefinition/SpliceType_res/*.hs
                   , examples/Refactor/AutoCorrect/*.hs
+                  , examples/Refactor/MoveForward/TopLevel/*.hs
 
                   , test/ExtensionOrganizerTest/ArrowsTest/*.hs
                   , test/ExtensionOrganizerTest/BangPatternsTest/*.hs
@@ -83,6 +84,10 @@ library
                      , Language.Haskell.Tools.Refactor.Builtin.ExtensionOrganizer.TraverseAST
                      , Language.Haskell.Tools.Refactor.Builtin.ExtensionOrganizer.Instances.Checkable
                      , Language.Haskell.Tools.Refactor.Builtin.ExtensionOrganizer.Instances.AppSelector
+                     , Language.Haskell.Tools.Refactor.Builtin.ExtensionOrganizer.Utils.TypeLookup
+                     , Language.Haskell.Tools.Refactor.Builtin.ExtensionOrganizer.Utils.SupportedExtensions
+                     , Language.Haskell.Tools.Refactor.Builtin.ExtensionOrganizer.Checkers
+                     , Language.Haskell.Tools.Refactor.Builtin.MoveForward
 
   other-modules:       Language.Haskell.Tools.Refactor.Builtin.ExtensionOrganizer.Checkers.ArrowsChecker
                      , Language.Haskell.Tools.Refactor.Builtin.ExtensionOrganizer.Checkers.BangPatternsChecker
