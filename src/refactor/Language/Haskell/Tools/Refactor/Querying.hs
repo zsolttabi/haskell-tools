@@ -15,6 +15,14 @@ data QueryChoice = LocationQuery
                      { queryName :: String
                      , locationQuery :: RealSrcSpan -> ModuleDom -> [ModuleDom] -> QueryMonad Value
                      }
+                 | ProjectQuery
+                     { queryName :: String
+                     , projectQuery :: [ModuleDom] -> QueryMonad Value
+                     }
+                 | ProjectQueryReadable
+                     { queryName :: String
+                     , projectQueryReadable :: [ModuleDom] -> QueryMonad Value
+                     }
 
 type QueryMonad = ExceptT String Ghc
 
@@ -35,6 +43,14 @@ performQuery queries (name:args) mod mods =
       -> runExceptT $ query (correctRefactorSpan (snd mod) $ readSrcSpan sp) mod mods
     (Just (LocationQuery _ query), _, _)
       -> return $ Left $ "The query '" ++ name ++ "' needs one argument: a source range"
+    (Just (ProjectQuery _ query), Right mod, _)
+      -> runExceptT $ query (mod:mods)
+    (Just (ProjectQuery _ query), Left _, _)
+          -> runExceptT $ query mods
+    (Just (ProjectQueryReadable _ query), Right mod, _)
+          -> runExceptT $ query (mod:mods)
+    (Just (ProjectQueryReadable _ query), Left _, _)
+          -> runExceptT $ query mods
     (Nothing, _, _)
       -> return $ Left $ "Unknown command: " ++ name
   where query = find ((== name) . queryName) queries

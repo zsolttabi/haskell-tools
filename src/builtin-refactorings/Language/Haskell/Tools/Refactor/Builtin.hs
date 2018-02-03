@@ -14,6 +14,7 @@ import Language.Haskell.Tools.Refactor.Builtin.RenameDefinition (renameDefinitio
 import Language.Haskell.Tools.Refactor.Builtin.GetMatches (getMatchesQuery)
 import Language.Haskell.Tools.Refactor.Builtin.AutoCorrect
 import Language.Haskell.Tools.Refactor.Builtin.MoveForward (moveForwardRefactoring)
+import Language.Haskell.Tools.Refactor.Builtin.CloneDetection (cloneDetectionQuery, cloneDetectionQueryReadable)
 
 builtinRefactorings :: [RefactoringChoice]
 builtinRefactorings
@@ -32,4 +33,4 @@ builtinRefactorings
     ]
 
 builtinQueries :: [QueryChoice]
-builtinQueries = [ getMatchesQuery ]
+builtinQueries = [ getMatchesQuery, cloneDetectionQuery, cloneDetectionQueryReadable ]

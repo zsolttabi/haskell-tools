@@ -119,15 +119,6 @@ instance ToJSON ResponseMsg
 instance ToJSON Marker
 instance ToJSON Severity
 
-instance ToJSON SrcSpan where
-  toJSON (RealSrcSpan sp) = object [ "file" A..= unpackFS (srcSpanFile sp)
-                                   , "startRow" A..= srcLocLine (realSrcSpanStart sp)
-                                   , "startCol" A..= srcLocCol (realSrcSpanStart sp)
-                                   , "endRow" A..= srcLocLine (realSrcSpanEnd sp)
-                                   , "endCol" A..= srcLocCol (realSrcSpanEnd sp)
-                                   ]
-  toJSON _ = Null
-
 data UndoRefactor = RemoveAdded { undoRemovePath :: FilePath }
                   | RestoreRemoved { undoRestorePath :: FilePath
                                    , undoRestoreContents :: String
