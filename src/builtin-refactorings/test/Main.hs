@@ -1,4 +1,6 @@
-{-# LANGUAGE LambdaCase, MonoLocalBinds #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MonoLocalBinds #-}
+
 
 module Main where
 
@@ -41,6 +43,7 @@ main = defaultMain $ testGroup "refactor tests"
                            ++ map makeRenameDefinitionTest renameDefinitionTests
                            ++ map makeWrongRenameDefinitionTest wrongRenameDefinitionTests
                            ++ map makeExtractBindingTest extractBindingTests
+                           ++ map makeExtractBindingIndentTest extractBindingIndentTests
                            ++ map makeWrongExtractBindingTest wrongExtractBindingTests
                            ++ map makeInlineBindingTest inlineBindingTests
                            ++ map makeWrongInlineBindingTest wrongInlineBindingTests
@@ -143,7 +146,7 @@ renameDefinitionTests =
   , ("Refactor.RenameDefinition.AccentName", "3:1-3:2", "á")
   , ("Refactor.RenameDefinition.QualName", "3:1-3:2", "q")
   , ("Refactor.RenameDefinition.BacktickName", "3:1-3:2", "g")
-  , ("Refactor.RenameDefinition.ParenName", "4:3-4:5", "<->")
+  , ("Refactor.RenameDefinition.ParenName", "4:3-4:5", "<-->")
   , ("Refactor.RenameDefinition.RecordWildcards", "4:32-4:33", "yy")
   , ("Refactor.RenameDefinition.RecordPatternSynonyms", "4:16-4:17", "xx")
   , ("Refactor.RenameDefinition.ClassMember", "7:3-7:4", "q")
@@ -215,6 +218,11 @@ extractBindingTests =
   , ("Refactor.ExtractBinding.AssocOpMiddle", "3:9-3:14", "b")
   , ("Refactor.ExtractBinding.SiblingDefs", "7:9-7:10", "a")
   , ("Refactor.ExtractBinding.Case", "3:26-3:31", "g")
+  , ("Refactor.ExtractBinding.Guards", "5:22-5:25", "test")
+  ]
+
+extractBindingIndentTests =
+  [ ("Refactor.ExtractBinding.GuardsIndent", "5:22-5:25", "test", "2")
   ]
 
 wrongExtractBindingTests =
@@ -278,7 +286,7 @@ multiModuleTests =
 wrongMultiModuleTests =
   [ ("InlineBinding 3:1-3:2", "A", "Refactor" </> "InlineBinding" </> "AppearsInAnother", [])
   ]
-  
+
 autoCorrectTests =
   [ ("Refactor.AutoCorrect.SimpleReParen", "3:5-3:12")
   , ("Refactor.AutoCorrect.ExternalInstanceReParen", "4:5-4:15")
@@ -360,6 +368,9 @@ makeWrongGenerateSigTest (mod, rng) = createFailTest "GenerateSignature" [rng] m
 makeExtractBindingTest :: (String, String, String) -> TestTree
 makeExtractBindingTest (mod, rng, newName) = createTest "ExtractBinding" [rng, newName] mod
 
+makeExtractBindingIndentTest :: (String, String, String, String) -> TestTree
+makeExtractBindingIndentTest (mod, rng, newName, indent) = createTest "ExtractBinding" [rng, newName, indent] mod
+
 makeWrongExtractBindingTest :: (String, String, String) -> TestTree
 makeWrongExtractBindingTest (mod, rng, newName) = createFailTest "ExtractBinding" [rng, newName] mod
 
@@ -428,7 +439,7 @@ performRefactors command workingDir flags target = do
       load LoadAllTargets
       allMods <- getModuleGraph
       selectedMod <- getModSummary (GHC.mkModuleName target)
-      let otherModules = filter (not . (\ms -> ms_mod ms == ms_mod selectedMod && ms_hsc_src ms == ms_hsc_src selectedMod)) allMods
+      let otherModules = filter (not . (\ms -> ms_mod ms == ms_mod selectedMod && ms_hsc_src ms == ms_hsc_src selectedMod)) (mgModSummaries allMods)
       targetMod <- parseTyped selectedMod
       otherMods <- mapM parseTyped otherModules
       res <- performCommand builtinRefactorings (splitOn " " command)
@@ -441,7 +452,7 @@ performRefactors command workingDir flags target = do
                       Left l -> Left l)
              $ res
 
-type ParsedModule = Ann AST.UModule (Dom RdrName) SrcTemplateStage
+type ParsedModule = Ann AST.UModule (Dom GhcPs) SrcTemplateStage
 
 parseAST :: ModSummary -> Ghc ParsedModule
 parseAST modSum = do
@@ -455,7 +466,7 @@ parseAST modSum = do
   (if hasCppExtension then prepareASTCpp else prepareAST) sourceOrigin . placeComments (fst annots) (getNormalComments $ snd annots)
      <$> (runTrf (fst annots) (getPragmaComments $ snd annots) $ trfModule ms $ pm_parsed_source p)
 
-type RenamedModule = Ann AST.UModule (Dom GHC.Name) SrcTemplateStage
+type RenamedModule = Ann AST.UModule (Dom GhcRn) SrcTemplateStage
 
 parseRenamed :: ModSummary -> Ghc RenamedModule
 parseRenamed modSum = do
