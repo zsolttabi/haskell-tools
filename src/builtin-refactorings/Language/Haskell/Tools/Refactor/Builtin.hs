@@ -13,6 +13,8 @@ import Language.Haskell.Tools.Refactor.Builtin.OrganizeImports (organizeImportsR
 import Language.Haskell.Tools.Refactor.Builtin.RenameDefinition (renameDefinitionRefactoring)
 import Language.Haskell.Tools.Refactor.Builtin.GetMatches (getMatchesQuery)
 import Language.Haskell.Tools.Refactor.Builtin.AutoCorrect
+import Language.Haskell.Tools.Refactor.Builtin.MoveForward (moveForwardRefactoring)
+import Language.Haskell.Tools.Refactor.Builtin.CloneDetection (cloneDetectionQuery, cloneDetectionQueryReadable)
 
 builtinRefactorings :: [RefactoringChoice]
 builtinRefactorings
@@ -30,4 +32,4 @@ builtinRefactorings
     ]
 
 builtinQueries :: [QueryChoice]
-builtinQueries = [ getMatchesQuery, highlightExtensionsQuery ]
+builtinQueries = [ getMatchesQuery, cloneDetectionQuery, cloneDetectionQueryReadable, highlightExtensionsQuery ]
